@@ -22,7 +22,8 @@ export default defineConfig([
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks/rules-of-hooks': 'off',
       'react-hooks/static-components': 'off',
-      'react-hooks/set-state-in-effect': 'off'
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/immutability': 'off'
     }
   },
 ])
