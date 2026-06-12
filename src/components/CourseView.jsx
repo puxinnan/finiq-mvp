@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { COURSES } from '../data/courses';
 import { addScore, addMistake } from '../utils/storage';
 
-const CourseView = ({ lessonId, onBack }) => {
-  const [phase, setPhase] = useState('theory'); // 'theory' | 'quiz' | 'completed'
+const CourseView = ({ lessonId, initialPhase = 'theory', onBack }) => {
+  const [phase, setPhase] = useState(initialPhase); // 'theory' | 'quiz' | 'completed'
   const [currentIndex, setCurrentIndex] = useState(0);
   
   // Quiz specific states
@@ -13,12 +13,12 @@ const CourseView = ({ lessonId, onBack }) => {
 
   // Reset state when lesson changes
   useEffect(() => {
-    setPhase('theory');
+    setPhase(initialPhase);
     setCurrentIndex(0);
     setSelectedOption(null);
     setShowFeedback(false);
     setQuizScore(0);
-  }, [lessonId]);
+  }, [lessonId, initialPhase]);
 
   const course = COURSES.find(c => c.id === lessonId);
   
@@ -31,13 +31,7 @@ const CourseView = ({ lessonId, onBack }) => {
     if (currentIndex < course.theory.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Transition to quiz phase
-      if (course.quizPool && course.quizPool.length > 0) {
-        setPhase('quiz');
-        setCurrentIndex(0);
-      } else {
-        setPhase('completed');
-      }
+      setPhase('completed');
     }
   };
 
@@ -68,6 +62,22 @@ const CourseView = ({ lessonId, onBack }) => {
     }
   };
 
+  const renderStructuredContent = (text) => {
+    const lines = text.split('\n').filter(l => l.trim());
+    return lines.map((line, idx) => {
+      if (line.startsWith('【核心主张】')) {
+        return <div key={idx} className="theory-block highlight"><span className="theory-label">核心主张</span>{line.replace('【核心主张】', '').replace(/^：|:/, '')}</div>;
+      }
+      if (line.startsWith('【推演逻辑】') || line.startsWith('【执行步骤】')) {
+        return <div key={idx} className="theory-block"><span className="theory-label">推演逻辑 / 执行步骤</span>{line.replace(/【(推演逻辑|执行步骤)】/, '').replace(/^：|:/, '')}</div>;
+      }
+      if (line.startsWith('【关键支撑】')) {
+        return <div key={idx} className="theory-block subtle"><span className="theory-label">关键支撑</span>{line.replace('【关键支撑】', '').replace(/^：|:/, '')}</div>;
+      }
+      return <p key={idx} style={{ margin: '1rem 0', fontSize: '1.2rem', lineHeight: 1.6 }}>{line}</p>;
+    });
+  };
+
   // --- Rendering Helpers ---
   const renderTheory = () => {
     const theory = course.theory[currentIndex];
@@ -83,8 +93,12 @@ const CourseView = ({ lessonId, onBack }) => {
         </div>
 
         <div className="glass-card" style={{ marginTop: '2rem' }}>
-          <h2 style={{ color: 'var(--accent-color)' }}>{theory.title}</h2>
-          <p style={{ whiteSpace: 'pre-line', fontSize: '1.2rem', margin: '2rem 0' }}>{theory.content}</p>
+          <h2 style={{ color: 'var(--accent-color)', marginBottom: '2rem' }}>{theory.title}</h2>
+          
+          <div style={{ margin: '2rem 0' }}>
+            {renderStructuredContent(theory.content)}
+          </div>
+
           <div style={{ textAlign: 'center', marginTop: '3rem' }}>
             <button className="btn btn-primary" onClick={handleNextTheory}>
               {currentIndex === course.theory.length - 1 ? '进入实战测验' : '继续阅读'}
@@ -160,13 +174,25 @@ const CourseView = ({ lessonId, onBack }) => {
     return (
       <div className="glass-card animate-fade-in" style={{ marginTop: '2rem', textAlign: 'center' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
-        <h2 style={{ color: 'var(--secondary-color)' }}>章节完成！</h2>
-        <p style={{ fontSize: '1.2rem', margin: '1rem 0' }}>
-          你在本章的测试中答对了 <strong>{quizScore}</strong> / {course.quizPool.length} 道题。
-        </p>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-          答错的题目已被加入错题本，记得复习哦！
-        </p>
+        <h2 style={{ color: 'var(--success-color)' }}>{initialPhase === 'theory' ? '理论学习完成！' : '测验通关！'}</h2>
+        
+        {initialPhase === 'quiz' && (
+          <>
+            <p style={{ fontSize: '1.2rem', margin: '1rem 0' }}>
+              你在本章的测试中答对了 <strong style={{ color: 'var(--success-color)' }}>{quizScore}</strong> / {course.quizPool.length} 道题。
+            </p>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+              答错的题目已被加入错题本，记得随时复习！
+            </p>
+          </>
+        )}
+
+        {initialPhase === 'theory' && (
+          <p style={{ fontSize: '1.2rem', margin: '2rem 0', color: 'var(--text-secondary)' }}>
+            您已经掌握了本章的核心理论知识。建议您趁热打铁，进入测试模式检验学习成果！
+          </p>
+        )}
+
         <button className="btn btn-primary" onClick={onBack}>
           返回课程目录
         </button>
