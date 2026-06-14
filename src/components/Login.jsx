@@ -31,6 +31,22 @@ const Login = ({ onLoginSuccess }) => {
     }
   };
 
+  const handleGuestLogin = () => {
+    // 生成一个随机访客用户名
+    const guestName = `访客_${Math.floor(Math.random() * 10000)}`;
+    register(guestName, 'guest');
+    login(guestName, 'guest');
+    onLoginSuccess();
+  };
+
+  const handleClearData = () => {
+    if (window.confirm('这将会清空本地所有账号和游戏数据，确定要继续吗？')) {
+      localStorage.clear();
+      alert('数据已清空，请重新注册账号或使用访客模式！');
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: 0 }}>
       <div className="glass-card animate-fade-in" style={{ width: '400px', padding: '2rem' }}>
@@ -83,19 +99,39 @@ const Login = ({ onLoginSuccess }) => {
           <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', padding: '0.75rem' }}>
             {isRegistering ? '注册并登录' : '登 录'}
           </button>
+
+          <button 
+            type="button" 
+            className="btn btn-outline" 
+            style={{ padding: '0.75rem', borderColor: 'var(--text-secondary)', color: 'var(--text-primary)' }}
+            onClick={handleGuestLogin}
+          >
+            🧑‍💻 访客模式直接体验
+          </button>
         </form>
 
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            {isRegistering ? '已有账号？' : '还没有账号？'}
-          </span>
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              {isRegistering ? '已有账号？' : '还没有账号？'}
+            </span>
+            <button 
+              type="button"
+              className="btn btn-outline" 
+              style={{ padding: '0.2rem 0.5rem', marginLeft: '0.5rem', border: 'none', color: 'var(--secondary-color)' }}
+              onClick={() => { setIsRegistering(!isRegistering); setError(''); }}
+            >
+              {isRegistering ? '去登录' : '去注册'}
+            </button>
+          </div>
+          
           <button 
             type="button"
             className="btn btn-outline" 
-            style={{ padding: '0.2rem 0.5rem', marginLeft: '0.5rem', border: 'none', color: 'var(--secondary-color)' }}
-            onClick={() => { setIsRegistering(!isRegistering); setError(''); }}
+            style={{ padding: '0.2rem', border: 'none', color: 'var(--danger-color)', fontSize: '0.8rem' }}
+            onClick={handleClearData}
           >
-            {isRegistering ? '去登录' : '去注册'}
+            🗑️ 忘记账号？一键清空所有本地数据
           </button>
         </div>
       </div>
