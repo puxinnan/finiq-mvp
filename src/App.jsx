@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
 
 // Components
@@ -9,8 +9,13 @@ import CourseView from './components/CourseView';
 import Leaderboard from './components/Leaderboard';
 import MistakeBook from './components/MistakeBook';
 import CashflowGame from './components/CashflowGame';
+import Login from './components/Login';
+
+// Storage
+import { getCurrentUser, logout } from './utils/storage';
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
   const [currentView, setCurrentView] = useState('home_category');
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [courseMode, setCourseMode] = useState('theory');
@@ -26,13 +31,24 @@ function App() {
     setCurrentView('course');
   };
 
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+    setCurrentView('home_category');
+  };
+
+  // 如果没有登录，渲染登录页面
+  if (!currentUser) {
+    return <Login onLoginSuccess={() => setCurrentUser(getCurrentUser())} />;
+  }
+
   return (
     <div className="app-container">
       <header className="header animate-fade-in">
         <div className="logo" onClick={handleGoHome} style={{ cursor: 'pointer' }}>
           🪙 FinIQ 个人成长中心
         </div>
-        <nav style={{ display: 'flex', gap: '0.75rem' }}>
+        <nav style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <button className="btn btn-primary" onClick={() => setCurrentView('cashflow_game')}>
             🎲 现金流沙盘
           </button>
@@ -42,6 +58,12 @@ function App() {
           <button className="btn btn-outline" onClick={() => setCurrentView('leaderboard')}>
             🏆 排行榜
           </button>
+          <div style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>👤 {currentUser}</span>
+            <button className="btn btn-outline" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem', border: 'none', color: 'var(--danger-color)' }} onClick={handleLogout}>
+              退出
+            </button>
+          </div>
         </nav>
       </header>
 

@@ -5,8 +5,13 @@ import {
 } from '../data/cashflowEvents';
 import { PROFESSIONS } from '../data/professions';
 
+import { loadGameState, saveGameState, clearGameState } from '../utils/storage';
+
 const CashflowGame = ({ onBack }) => {
   const [gameState, setGameState] = useState(() => {
+    const savedState = loadGameState();
+    if (savedState) return savedState;
+
     const randomProf = PROFESSIONS[Math.floor(Math.random() * PROFESSIONS.length)];
     return {
       profession: randomProf.profession,
@@ -23,6 +28,10 @@ const CashflowGame = ({ onBack }) => {
       }
     };
   });
+
+  useEffect(() => {
+    saveGameState(gameState);
+  }, [gameState]);
   
   const [currentEvent, setCurrentEvent] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -488,7 +497,7 @@ const CashflowGame = ({ onBack }) => {
                           draggable
                           onDragStart={(e) => { e.dataTransfer.setData('text/plain', token.id); }}
                           style={{
-                            background: 'var(--accent-color)', color: 'white', padding: '0.75rem 1.5rem', 
+                            background: 'var(--accent-color)', color: '#000000', padding: '0.75rem 1.5rem', 
                             borderRadius: '8px', cursor: 'grab', display: 'flex', alignItems: 'center',
                             fontWeight: 'bold', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)'
                           }}

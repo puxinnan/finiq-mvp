@@ -35,6 +35,12 @@ const CourseView = ({ lessonId, initialPhase = 'theory', onBack }) => {
     }
   };
 
+  const handlePrevTheory = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   // --- Quiz Handling ---
   const handleOptionClick = (index) => {
     if (showFeedback) return; // Prevent changing after answered
@@ -59,6 +65,14 @@ const CourseView = ({ lessonId, initialPhase = 'theory', onBack }) => {
       setShowFeedback(false);
     } else {
       setPhase('completed');
+    }
+  };
+
+  const handlePrevQuiz = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setSelectedOption(null);
+      setShowFeedback(false);
     }
   };
 
@@ -99,7 +113,12 @@ const CourseView = ({ lessonId, initialPhase = 'theory', onBack }) => {
             {renderStructuredContent(theory.content)}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <div style={{ textAlign: 'center', marginTop: '3rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+            {currentIndex > 0 && (
+              <button className="btn btn-outline" onClick={handlePrevTheory}>
+                上一页
+              </button>
+            )}
             <button className="btn btn-primary" onClick={handleNextTheory}>
               {currentIndex === course.theory.length - 1 ? '进入实战测验' : '继续阅读'}
             </button>
@@ -157,13 +176,18 @@ const CourseView = ({ lessonId, initialPhase = 'theory', onBack }) => {
               </div>
             )}
 
-            {showFeedback && (
-              <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem' }}>
+              {currentIndex > 0 && (
+                <button className="btn btn-outline" onClick={handlePrevQuiz}>
+                  上一题
+                </button>
+              )}
+              {showFeedback && (
                 <button className="btn btn-primary" onClick={handleNextQuiz}>
                   {currentIndex === course.quizPool.length - 1 ? '查看成绩' : '下一题'}
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </>
